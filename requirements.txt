@@ -1,0 +1,6 @@
+if __name__ == "__main__":
+    if not os.path.exists(DATABASE):
+        open(DATABASE, "w").close()
+    with app.app_context():
+        init_db()
+    app.run(debug=True, port=5000)  # ← これはローカルで動かすとき専用

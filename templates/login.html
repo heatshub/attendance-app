@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>ログイン - 出欠管理</title>
+</head>
+<body>
+  <h1>出欠管理ログイン</h1>
+
+  {% if error %}
+    <p style="color:red;">{{ error }}</p>
+  {% endif %}
+
+  <!-- もし従来のID/パスワードログインも残すならここにフォーム -->
+
+  <p>または</p>
+
+  <p>
+    <a href="{{ url_for('login_line') }}">
+      LINEでログイン
+    </a>
+  </p>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>{{ year }}年{{ month }}月 出欠カレンダー</title>
+  <style>
+    table { border-collapse: collapse; }
+    th, td {
+      border: 1px solid #ccc;
+      width: 120px;
+      height: 80px;
+      vertical-align: top;
+      padding: 4px;
+      font-size: 12px;
+    }
+    .other-month {
+      background-color: #f5f5f5;
+      color: #aaa;
+    }
+    .today {
+      border: 2px solid #f00;
+    }
+    .attendees {
+      margin-top: 4px;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+  <h1>{{ year }}年{{ month }}月 出欠カレンダー</h1>
+  <p>ログイン中: {{ g.user["username"] }} / <a href="{{ url_for('logout') }}">ログアウト</a></p>
+
+  <table>
+    <tr>
+      <th>日</th><th>月</th><th>火</th><th>水</th><th>木</th><th>金</th><th>土</th>
+    </tr>
+    {% for week in month_weeks %}
+      <tr>
+        {% for day in week %}
+          {% set classes = [] %}
+          {% if day.month != month %}
+            {% set _ = classes.append("other-month") %}
+          {% endif %}
+          {% if day == today %}
+            {% set _ = classes.append("today") %}
+          {% endif %}
+          <td class="{{ ' '.join(classes) }}">
+            <div>{{ day.day }}</div>
+
+            {# 出席者一覧 #}
+            {% set day_str = day.isoformat() %}
+            {% if day_str in attendance_map %}
+              <div class="attendees">
+                出席：
+                <ul>
+                  {% for rec in attendance_map[day_str] %}
+                    <li>
+                      {{ rec.username }}
+                      {% if rec.start_time and rec.end_time %}
+                        ：{{ rec.start_time }}〜{{ rec.end_time }}
+                      {% elif rec.start_time %}
+                        ：{{ rec.start_time }}〜
+                      {% elif rec.end_time %}
+                        ：〜{{ rec.end_time }}
+                      {% endif %}
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+
+
+
+            {# 今日だけ出席ボタンを表示 #}
+            {% if day == today %}
+              <form method="post" action="{{ url_for('attendance_start') }}" style="margin-top:4px;">
+                <button type="submit">開始</button>
+              </form>
+              <form method="post" action="{{ url_for('attendance_end') }}" style="margin-top:4px;">
+                <button type="submit">終了</button>
+              </form>
+            {% endif %}
+
+
+          </td>
+        {% endfor %}
+      </tr>
+    {% endfor %}
+  </table>
+</body>
+</html>
