@@ -3,8 +3,10 @@ import sqlite3
 import requests
 import secrets
 import urllib.parse
+import calendar  # ★これを追加
 from datetime import date, datetime
 from flask import Flask, render_template, request, redirect, url_for, session, g
+
 
 # --- 設定類は環境変数から読む ---
 DATABASE = "attendance.db"  # とりあえずローカルSQLiteのまま
