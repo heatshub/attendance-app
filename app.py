@@ -1,5 +1,6 @@
 import os
-import sqlite3
+import psycopg2
+import psycopg2.extras
 import requests
 import secrets
 import urllib.parse
@@ -10,7 +11,6 @@ from flask import Flask, render_template, request, redirect, url_for, session, g
 
 
 # --- 設定類は環境変数から読む ---
-DATABASE = "attendance.db"  # とりあえずローカルSQLiteのまま
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key")
 
 LINE_CHANNEL_ID = os.environ.get("LINE_CHANNEL_ID")
@@ -34,9 +34,13 @@ app.config["SECRET_KEY"] = SECRET_KEY
 
 def get_db():
     if "db" not in g:
-        g.db = sqlite3.connect(DATABASE)
-        g.db.row_factory = sqlite3.Row
+        g.db = psycopg2.connect(
+            os.environ["DATABASE_URL"],
+            cursor_factory=psycopg2.extras.RealDictCursor
+        )
     return g.db
+
+
 
 @app.teardown_appcontext
 def close_db(exception):
@@ -277,23 +281,24 @@ def calendar_view():
         return redirect(url_for("login"))
 
     db = get_db()
-    today = date.today()
+    cur = db.cursor()
+
+    today = date.today()          # date型のまま渡してOK（Postgresのdateに一致）
     today_str = today.isoformat()
 
     # 30分刻みの時間スロット（00:00〜23:30）
     time_slots = [f"{h:02d}:{m:02d}" for h in range(24) for m in (0, 30)]
 
-    # 今日の出席データを取得
-    # ここはあなたのテーブル構成に合わせて調整してください
-    # 例：attendance(date TEXT, user_id INTEGER, start_time TEXT, end_time TEXT)
-    rows = db.execute("""
-        SELECT u.name AS username,
+    # 今日の出席データを取得（PostgreSQL用：%s、カラムは u.username）
+    cur.execute("""
+        SELECT u.username AS username,
                a.start_time,
                a.end_time
         FROM attendance a
         JOIN users u ON a.user_id = u.id
-        WHERE a.date = ?
-    """, (today_str,)).fetchall()
+        WHERE a.date = %s
+    """, (today,))
+    rows = cur.fetchall()
 
     # ユーザーごとの「埋まっているスロット index の集合」を作る
     coverage = {}  # { username: set([slot_index, ...]) }
@@ -303,19 +308,23 @@ def calendar_view():
         start = row["start_time"]
         end = row["end_time"] or row["start_time"]
 
+        # PostgreSQLのtime型は datetime.time で返ってくることが多いので文字列化
+        if start is not None and not isinstance(start, str):
+            start = start.strftime("%H:%M")
+        if end is not None and not isinstance(end, str):
+            end = end.strftime("%H:%M")
+
         start_min = time_to_minutes(start)
         end_min = time_to_minutes(end)
 
         if end_min < start_min:
-            # 万が一終了時間が開始より前の場合は無視
             continue
 
         if username not in coverage:
             coverage[username] = set()
 
         for idx, slot in enumerate(time_slots):
-            slot_min = idx * 30  # 0:00 からの経過分
-            # 各スロットの開始が、出席時間内に入っていれば「出席」とみなす
+            slot_min = idx * 30
             if start_min <= slot_min < end_min:
                 coverage[username].add(idx)
 
@@ -329,6 +338,7 @@ def calendar_view():
         usernames=usernames,
         coverage=coverage,
     )
+
 
 
 @login_required
