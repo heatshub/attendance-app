@@ -257,6 +257,8 @@ def logout():
     session.clear()
     return redirect(url_for("login"))
 
+# ---------- カレンダー & 出席ボタン ----------
+
 @app.route("/")
 def index():
     if "user_id" not in session:
@@ -267,15 +269,6 @@ def index():
         username=session.get("display_name") or session.get("username"),
         today=today,
     )
-
-# ---------- カレンダー & 出席ボタン ----------
-
-@app.route("/")
-def index():
-    if g.user:
-        return redirect(url_for("calendar_view"))
-    else:
-        return redirect(url_for("login"))
 
 
 @app.route("/calendar")
