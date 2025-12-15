@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>出席管理</title>
+
+<body>
+    <!-- 追加：トップバー -->
+    <div class="top-bar">
+        <div class="top-left">
+            {{ username }} さん
+        </div>
+        <div class="top-right">
+            <a href="{{ url_for('calendar_view') }}" class="icon-button" aria-label="カレンダー">
+                📅
+            </a>
+        </div>
+    </div>
+
+    <!-- ここから既存の時計／ボタンUI -->
+    ...
+</body>
+
+
+<style>
+
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background: url('/static/bg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        color: white;
+        text-align: center;
+    }
+    
+    /* ★ 追加：上部バー */
+    .top-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 56px;
+        padding: 0 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        backdrop-filter: blur(10px);
+        background: linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0));
+        z-index: 10;
+        font-size: 0.95rem;
+    }
+    
+    .top-left {
+        font-weight: 600;
+    }
+    
+    .icon-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.4);
+        background: rgba(255,255,255,0.12);
+        color: #fff;
+        text-decoration: none;
+        font-size: 1.2rem;
+    }
+    .icon-button:hover {
+        background: rgba(255,255,255,0.2);
+    }
+
+
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background: url('/static/bg.png') no-repeat center center fixed;
+        background-size: cover;
+        color: white;
+        text-align: center;
+    }
+
+    .date {
+        margin-top: 80px;
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .clock {
+        font-size: 4rem;
+        font-weight: 700;
+        margin-top: 10px;
+        text-shadow: 0 0 20px rgba(255,255,255,0.9);
+    }
+
+    .buttons {
+        margin-top: 60px;
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+    }
+
+    .btn-glass {
+        padding: 20px 32px;
+        border-radius: 22px;
+        backdrop-filter: blur(8px);
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255,255,255,0.4);
+        font-size: 1.3rem;
+        cursor: pointer;
+        color: white;
+        transition: 0.2s ease;
+    }
+
+    .btn-glass:hover {
+        background: rgba(255,255,255,0.25);
+    }
+
+    /* ★ iPhone風タブバー */
+    .tabbar {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        height: 70px;
+        background: rgba(0,0,0,0.3);
+        backdrop-filter: blur(10px);
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+    }
+
+    .tab {
+        text-align: center;
+        color: white;
+        opacity: 0.8;
+        font-size: 0.8rem;
+    }
+</style>
+
+<script>
+    // 時刻をリアルタイム更新
+    function updateClock() {
+        const now = new Date();
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mm = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById("clock").innerText = `${hh}:${mm}`;
+    }
+    setInterval(updateClock, 1000);
+    window.onload = updateClock;
+</script>
+
+</head>
+<body>
+
+    <div class="date">{{ today }}</div>
+    <div id="clock" class="clock">00:00</div>
+
+    <div class="buttons">
+        <form method="POST" action="/start">
+            <button class="btn-glass">出席</button>
+        </form>
+        <form method="POST" action="/end">
+            <button class="btn-glass">終了</button>
+        </form>
+    </div>
+
+    <!-- タブバー -->
+    <div class="tabbar">
+        <div class="tab">👤</div>
+        <div class="tab">🏠</div>
+        <div class="tab">👥</div>
+    </div>
+
+</body>
+</html>

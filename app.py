@@ -3,9 +3,10 @@ import sqlite3
 import requests
 import secrets
 import urllib.parse
-import calendar  # ★これを追加
+import calendar
 from datetime import date, datetime
 from flask import Flask, render_template, request, redirect, url_for, session, g
+
 
 
 # --- 設定類は環境変数から読む ---
@@ -93,6 +94,16 @@ def login_required(view_func):
             return redirect(url_for("login"))
         return view_func(*args, **kwargs)
     return wrapped
+
+def time_to_minutes(tstr: str) -> int:
+    """'HH:MM' や 'HH:MM:SS' 形式の文字列を分に変換する"""
+    if not tstr:
+        return 0
+    parts = tstr.split(":")
+    h = int(parts[0])
+    m = int(parts[1]) if len(parts) > 1 else 0
+    return h * 60 + m
+
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -246,6 +257,16 @@ def logout():
     session.clear()
     return redirect(url_for("login"))
 
+@app.route("/")
+def index():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+    today = date.today().isoformat()
+    return render_template(
+        "home.html",
+        username=session.get("display_name") or session.get("username"),
+        today=today,
+    )
 
 # ---------- カレンダー & 出席ボタン ----------
 
@@ -258,6 +279,65 @@ def index():
 
 
 @app.route("/calendar")
+def calendar_view():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    db = get_db()
+    today = date.today()
+    today_str = today.isoformat()
+
+    # 30分刻みの時間スロット（00:00〜23:30）
+    time_slots = [f"{h:02d}:{m:02d}" for h in range(24) for m in (0, 30)]
+
+    # 今日の出席データを取得
+    # ここはあなたのテーブル構成に合わせて調整してください
+    # 例：attendance(date TEXT, user_id INTEGER, start_time TEXT, end_time TEXT)
+    rows = db.execute("""
+        SELECT u.name AS username,
+               a.start_time,
+               a.end_time
+        FROM attendance a
+        JOIN users u ON a.user_id = u.id
+        WHERE a.date = ?
+    """, (today_str,)).fetchall()
+
+    # ユーザーごとの「埋まっているスロット index の集合」を作る
+    coverage = {}  # { username: set([slot_index, ...]) }
+
+    for row in rows:
+        username = row["username"]
+        start = row["start_time"]
+        end = row["end_time"] or row["start_time"]
+
+        start_min = time_to_minutes(start)
+        end_min = time_to_minutes(end)
+
+        if end_min < start_min:
+            # 万が一終了時間が開始より前の場合は無視
+            continue
+
+        if username not in coverage:
+            coverage[username] = set()
+
+        for idx, slot in enumerate(time_slots):
+            slot_min = idx * 30  # 0:00 からの経過分
+            # 各スロットの開始が、出席時間内に入っていれば「出席」とみなす
+            if start_min <= slot_min < end_min:
+                coverage[username].add(idx)
+
+    usernames = sorted(coverage.keys())
+
+    return render_template(
+        "calendar_grid.html",
+        username=session.get("display_name") or session.get("username"),
+        today=today_str,
+        time_slots=time_slots,
+        usernames=usernames,
+        coverage=coverage,
+    )
+
+
 @login_required
 def calendar_view():
     db = get_db()
