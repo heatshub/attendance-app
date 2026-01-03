@@ -1,0 +1,102 @@
+body{
+  margin:0;
+  background:#0b1020;
+  color:#fff;
+  font-family:sans-serif;
+}
+
+.wrap{max-width:1000px;margin:0 auto;padding:16px}
+
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px;
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:12px;
+}
+
+.board{
+  margin-top:16px;
+  border:1px solid rgba(255,255,255,.2);
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:72px 1fr;
+}
+
+.timecol{
+  position:relative;
+  min-height:1200px;
+  border-right:2px solid rgba(255,255,255,.4);
+}
+
+.tick{
+  position:absolute;
+  left:8px;
+  font-size:12px;
+  transform:translateY(-50%);
+}
+
+.tickline{
+  position:absolute;
+  left:0;
+  right:0;
+  height:1px;
+  background:rgba(255,255,255,.15);
+}
+
+.head{
+  display:grid;
+  grid-auto-flow:column;
+  grid-auto-columns:25%;
+}
+
+.name{
+  text-align:center;
+  padding:8px;
+  border-right:2px solid rgba(255,255,255,.4);
+}
+
+.canvas{
+  position:relative;
+  min-height:1200px;
+}
+
+.cols{
+  position:absolute;
+  inset:0;
+  display:grid;
+  grid-auto-flow:column;
+  grid-auto-columns:25%;
+}
+
+.col{
+  border-right:2px solid rgba(255,255,255,.4);
+}
+
+.colwrap{
+  position:absolute;
+  inset:0;
+  display:grid;
+  grid-auto-flow:column;
+  grid-auto-columns:25%;
+}
+
+.cell{position:relative}
+
+.block{
+  position:absolute;
+  left:8px;
+  right:8px;
+  background:rgba(0,255,255,.3);
+  border:2px solid rgba(0,255,255,.8);
+  border-radius:12px;
+  text-align:center;
+}
+
+.btn{
+  margin-top:12px;
+  padding:10px 16px;
+}

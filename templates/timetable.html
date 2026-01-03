@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>Timetable</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="wrap">
+  <div class="top">
+    <div class="title">Attendance</div>
+    
+    <div class="daynav">
+      <a href="{{ url_for('index') }}" class="home-btn">🏠 Home</a>
+    
+      <a href="{{ url_for('timetable_view', day=prev_day) }}">‹</a>
+      <div class="day">{{ day }}</div>
+      <a href="{{ url_for('timetable_view', day=next_day) }}">›</a>
+    </div>
+  </div>
+
+
+  <div class="board">
+
+    <!-- ヘッダー -->
+    <div class="grid headrow">
+      <div></div>
+      <div class="head">
+        {% for u in users %}
+          <div class="name">{{ u.display_name }}</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- 本体 -->
+    <div class="grid">
+      <div class="timecol">
+        {% for t in ticks %}
+          <div class="tick" style="top:{{ t.pos_pct }}%">{{ t.label }}</div>
+          <div class="tickline" style="top:{{ t.pos_pct }}%"></div>
+        {% endfor %}
+      </div>
+
+      <div class="canvas">
+        <div class="cols">
+          {% for u in users %}<div class="col"></div>{% endfor %}
+        </div>
+
+        <div class="colwrap">
+          {% for u in users %}
+          <div class="cell">
+            {% for b in blocks %}
+              {% if b.user_id == u.id %}
+                <div class="block" style="top:{{ b.top_pct }}%;height:{{ b.height_pct }}%">
+                  <div>
+                    PRESENT
+                    <small>{{ b.start }} – {{ b.end }}</small>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+
+</div>
+</body>
+</html>
