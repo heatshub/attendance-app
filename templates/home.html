@@ -234,6 +234,37 @@
 
 
 </head>
+
+<h2>作業時間ランキング</h2>
+
+<h3>今日（{{ today }}）</h3>
+<ol>
+  {% for r in rank_today %}
+    <li>{{ r.display_name }}：{{ r.hours }} h</li>
+  {% else %}
+    <li>データがありません</li>
+  {% endfor %}
+</ol>
+
+<h3>今週（{{ week_start }} 〜 {{ today }}）</h3>
+<ol>
+  {% for r in rank_week %}
+    <li>{{ r.display_name }}：{{ r.hours }} h</li>
+  {% else %}
+    <li>データがありません</li>
+  {% endfor %}
+</ol>
+
+<h3>今月（{{ month_start }} 〜 {{ today }}）</h3>
+<ol>
+  {% for r in rank_month %}
+    <li>{{ r.display_name }}：{{ r.hours }} h</li>
+  {% else %}
+    <li>データがありません</li>
+  {% endfor %}
+</ol>
+
+
 <body>
 
     <div class="date">{{ today }}</div>
