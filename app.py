@@ -168,9 +168,66 @@ def logout():
 @app.route("/")
 @login_required
 def index():
+    # 期間を決める（例：今週＝月曜〜今日）
+    today = datetime.now(TZ).date()
+    week_start = today - timedelta(days=today.weekday())  # Monday start
+    month_start = today.replace(day=1)
+
+    db = get_db()
+    with db.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        # 今日ランキング
+        cur.execute("""
+            SELECT
+              u.id AS user_id,
+              u.display_name,
+              ROUND(SUM(EXTRACT(EPOCH FROM (COALESCE(a.end_at, NOW()) - a.start_at))) / 3600.0, 2) AS hours
+            FROM public.users u
+            JOIN public.attendance a ON a.user_id = u.id
+            WHERE a.start_at::date = %s
+            GROUP BY u.id, u.display_name
+            ORDER BY hours DESC, u.id ASC;
+        """, (today.isoformat(),))
+        rank_today = cur.fetchall()
+
+        # 今週ランキング（月曜〜）
+        cur.execute("""
+            SELECT
+              u.id AS user_id,
+              u.display_name,
+              ROUND(SUM(EXTRACT(EPOCH FROM (COALESCE(a.end_at, NOW()) - a.start_at))) / 3600.0, 2) AS hours
+            FROM public.users u
+            JOIN public.attendance a ON a.user_id = u.id
+            WHERE a.start_at >= %s::date
+              AND a.start_at < (%s::date + INTERVAL '1 day')
+            GROUP BY u.id, u.display_name
+            ORDER BY hours DESC, u.id ASC;
+        """, (week_start.isoformat(), today.isoformat()))
+        rank_week = cur.fetchall()
+
+        # 今月ランキング（1日〜）
+        cur.execute("""
+            SELECT
+              u.id AS user_id,
+              u.display_name,
+              ROUND(SUM(EXTRACT(EPOCH FROM (COALESCE(a.end_at, NOW()) - a.start_at))) / 3600.0, 2) AS hours
+            FROM public.users u
+            JOIN public.attendance a ON a.user_id = u.id
+            WHERE a.start_at >= %s::date
+              AND a.start_at < (%s::date + INTERVAL '1 day')
+            GROUP BY u.id, u.display_name
+            ORDER BY hours DESC, u.id ASC;
+        """, (month_start.isoformat(), today.isoformat()))
+        rank_month = cur.fetchall()
+
     return render_template(
         "home.html",
-        username=session["display_name"]
+        username=session["display_name"],
+        rank_today=rank_today,
+        rank_week=rank_week,
+        rank_month=rank_month,
+        today=today.isoformat(),
+        week_start=week_start.isoformat(),
+        month_start=month_start.isoformat(),
     )
 
 @app.route("/timetable")
