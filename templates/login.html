@@ -2,23 +2,28 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <title>ログイン - 出欠管理</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ログイン - 出席管理</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
-  <h1>出欠管理ログイン</h1>
+<body class="login-page">
 
-  {% if error %}
-    <p style="color:red;">{{ error }}</p>
-  {% endif %}
+  <main class="login-card">
+    <h1>出席管理アプリ</h1>
 
-  <!-- もし従来のID/パスワードログインも残すならここにフォーム -->
+    <p class="login-lead">
+      LINEアカウントでログインすると、出席時間を記録し、
+      タイムテーブル形式で可視化できます。
+    </p>
 
-  <p>または</p>
-
-  <p>
-    <a href="{{ url_for('login_line') }}">
+    <a class="demo-login-btn" href="{{ url_for('login_line') }}">
       LINEでログイン
     </a>
-  </p>
+
+    <p class="login-note">
+      LINEのプロフィール情報は、ユーザー識別と表示名の取得にのみ使用します。
+    </p>
+  </main>
+
 </body>
 </html>
