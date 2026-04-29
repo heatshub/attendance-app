@@ -34,29 +34,38 @@
         </div>
       </div>
 
-      <div class="line-chart">
-        {% set count = chart_values|length %}
-        {% set maxv = chart_max if chart_max > 0 else 1 %}
+      <div class="chart-area">
+        <div class="y-axis">
+          <span>{{ chart_max }}h</span>
+          <span>{{ (chart_max / 2)|round(1) }}h</span>
+          <span>0h</span>
+        </div>
 
-        <svg viewBox="0 0 100 40" preserveAspectRatio="none">
-          <polyline
-            fill="none"
-            stroke="rgba(0,255,255,.9)"
-            stroke-width="1.6"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            points="
-              {% for v in chart_values %}
-                {% set x = 0 if count == 1 else loop.index0 / (count - 1) * 100 %}
-                {% set y = 36 - (v / maxv * 30) %}
-                {{ x }},{{ y }}
-              {% endfor %}
-            "
-          />
-        </svg>
+        <div class="line-chart">
+          {% set count = chart_values|length %}
+          {% set maxv = chart_max if chart_max > 0 else 1 %}
+
+          <svg viewBox="0 0 100 40" preserveAspectRatio="none">
+            <polyline
+              fill="none"
+              stroke="rgba(0,255,255,.9)"
+              stroke-width="0.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              points="
+                {% for v in chart_values %}
+                  {% set x = 0 if count == 1 else loop.index0 / (count - 1) * 100 %}
+                  {% set y = 36 - (v / maxv * 30) %}
+                  {{ x }},{{ y }}
+                {% endfor %}
+              "
+            />
+          </svg>
+        </div>
       </div>
 
       <div class="chart-labels">
+        <span></span>
         {% for label in chart_labels %}
           {% if loop.index == 1 or loop.index == chart_labels|length or loop.index % 5 == 0 %}
             <span>{{ label }}</span>

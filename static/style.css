@@ -266,6 +266,7 @@ body {
   font-weight: 700;
 }
 
+/* chart */
 .chart-card {
   margin-top: 16px;
   padding: 18px;
@@ -302,8 +303,26 @@ body {
   font-size: 13px;
 }
 
-.line-chart {
+.chart-area {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 10px;
+  align-items: stretch;
   margin-top: 16px;
+}
+
+.y-axis {
+  height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: right;
+  font-size: 11px;
+  color: rgba(255,255,255,.55);
+  padding: 10px 0;
+}
+
+.line-chart {
   height: 180px;
   padding: 10px;
   border-radius: 18px;
@@ -320,7 +339,8 @@ body {
 
 .chart-labels {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(18px, 1fr));
+  grid-template-columns: 44px repeat(auto-fit, minmax(18px, 1fr));
+  gap: 10px;
   margin-top: 6px;
   font-size: 10px;
   color: rgba(255,255,255,.45);
@@ -456,6 +476,14 @@ body {
 
   .chart-head {
     flex-direction: column;
+  }
+
+  .chart-area {
+    grid-template-columns: 38px 1fr;
+  }
+
+  .chart-labels {
+    grid-template-columns: 38px repeat(auto-fit, minmax(18px, 1fr));
   }
 
   .action-buttons {
